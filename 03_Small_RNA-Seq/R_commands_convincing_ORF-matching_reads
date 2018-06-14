@@ -1,0 +1,40 @@
+args = commandArgs(trailingOnly=TRUE)
+#args=c('embryon_15h','1')
+sample=args[1]
+library=args[2]
+
+depth=read.table('Statistics.dat',header=T)
+data=read.table(paste('Size_distribution_convincing_ORF_transcriptome-matching_reads_not_matching_abundant_ncRNAs_or_pre-miRNA_hairpins_',sample,'_',library,'.dat',sep=''),header=T)
+if (sample=='embryon_8h') name='8 hpf embryo'
+if (sample=='embryon_15h') name='15 hpf embryo'
+if (sample=='embryon_36h') name='36 hpf embryo'
+if (sample=='embryon_60h') name='60 hpf embryo'
+if (sample=='femelle') name='adult female'
+if (sample=='male') name='adult male'
+
+d=(depth$Genome.matching_reads-depth$ncRNA.matching_reads)[depth$Sample==sample & depth$Library==library]
+sense=data$Sense_matching/d*1e6
+antisense=data$Antisense_matching/d*1e6
+par(mar=c(4,4,0.5,0))
+y_range=max(pretty(c(0,max(c(sense,antisense)))))
+#Below: to display every graph with the same scale:
+#y_range=6e5
+#Above: to display every graph with the same scale
+plot(18,18,xlim=c(17,31),ylim=c(-y_range,y_range),xlab='RNA length (nt)',ylab='Number of transcriptome-matching reads (ppm)',ty='n',axes=F)
+display_range=range(summary(axis(2)))
+pdf(paste('Size_distribution_convincing_ORF_transcriptomic_not_ncRNA_not_hairpin-matching_reads_',sample,'_',library,'.pdf',sep=''),width=6,height=4.5)
+plot(18,18,xlim=c(17,31),ylim=c(-y_range,y_range),xlab='RNA length (nt)',ylab='Number of reads (ppm)',ty='n',axes=F)
+axis(1)
+axis(2,labels=abs(pretty(display_range)),at=pretty(display_range))
+arrows(17,display_range[2]/4,17,3*display_range[2]/4,col='blue',length=0.1)
+arrows(17,-display_range[2]/4,17,-3*display_range[2]/4,col='red',length=0.1)
+text(17,display_range[2]/4,'sense',col='blue',srt=90,pos=4)
+text(17,-3*display_range[2]/4,'antisense',col='red',srt=90,pos=4)
+for (size in 18:30)
+{
+rect(size-0.5,0,size+0.5,sense[data$Size==size],border='blue',lwd=2)
+rect(size-0.5,0,size+0.5,-antisense[data$Size==size],border='red',lwd=2)
+}
+dev.off()
+
+

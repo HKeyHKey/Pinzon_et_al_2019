@@ -1,0 +1,90 @@
+depth=read.table('Statistics.dat',header=T)
+
+for (sample in unique(depth$Sample))
+for (lib in 1:4)
+{
+data=read.table(paste('Size_distribution_transcriptome-matching_reads_',sample,'_',lib,'.dat',sep=''),header=T)
+d=(depth$Genome.matching_reads-depth$ncRNA.matching_reads)[depth$Sample==sample & depth$Library==lib]
+sense=data$Sense_matching/d*1e6
+antisense=data$Antisense_matching/d*1e6
+par(mar=c(4,4,0.5,0))
+y_range=max(pretty(c(0,max(c(sense,antisense)))))
+plot(18,18,xlim=c(17,31),ylim=c(-y_range,y_range),xlab='RNA length (nt)',ylab='Number of reads (ppm)',ty='n',axes=F)
+display_range=range(summary(axis(2)))
+pdf(paste('Size_distribution_transcriptome-matching_reads_',sample,'_',lib,'.pdf',sep=''),width=6,height=4.5)
+plot(18,18,xlim=c(17,31),ylim=c(-y_range,y_range),xlab='RNA length (nt)',ylab='Number of reads (ppm)',ty='n',axes=F)
+axis(1)
+axis(2,labels=abs(pretty(display_range)),at=pretty(display_range))
+arrows(17,display_range[2]/4,17,3*display_range[2]/4,col='blue',length=0.1)
+arrows(17,-display_range[2]/4,17,-3*display_range[2]/4,col='red',length=0.1)
+text(17,display_range[2]/4,'sense',col='blue',srt=90,pos=4)
+text(17,-3*display_range[2]/4,'antisense',col='red',srt=90,pos=4)
+for (size in 18:30)
+{
+rect(size-0.5,0,size+0.5,sense[data$Size==size],border='blue',lwd=2)
+rect(size-0.5,0,size+0.5,-antisense[data$Size==size],border='red',lwd=2)
+}
+dev.off()
+}
+
+for (sample in unique(depth$Sample))
+for (lib in 1:4)
+{
+data=read.table(paste('Size_distribution_convincing_ORF-matching_reads_',sample,'_',lib,'.dat',sep=''),header=T)
+d=(depth$Genome.matching_reads-depth$ncRNA.matching_reads)[depth$Sample==sample & depth$Library==lib]
+sense=data$Sense_matching/d*1e6
+antisense=data$Antisense_matching/d*1e6
+par(mar=c(4,4,0.5,0))
+y_range=max(pretty(c(0,max(c(sense,antisense)))))
+plot(18,18,xlim=c(17,31),ylim=c(-y_range,y_range),xlab='RNA length (nt)',ylab='Number of reads (ppm)',ty='n',axes=F)
+display_range=range(summary(axis(2)))
+pdf(paste('Size_distribution_convincing_ORF-matching_reads_',sample,'_',lib,'.pdf',sep=''),width=7,height=6)
+plot(18,18,xlim=c(17,31),ylim=c(-y_range,y_range),xlab='RNA length (nt)',ylab='Number of reads (ppm)',ty='n',axes=F)
+axis(1)
+axis(2,labels=abs(pretty(display_range)),at=pretty(display_range))
+arrows(17,display_range[2]/10,17,display_range[2]/2,col='blue',length=0.1)
+arrows(17,-display_range[2]/10,17,-display_range[2]/2,col='red',length=0.1)
+text(17,display_range[2]/10,'sense',col='blue',srt=90,pos=4)
+text(17,-display_range[2]/2,'antisense',col='red',srt=90,pos=4)
+for (size in 18:30)
+{
+rect(size-0.5,0,size+0.5,sense[data$Size==size],border='blue',lwd=2)
+rect(size-0.5,0,size+0.5,-antisense[data$Size==size],border='red',lwd=2)
+}
+dev.off()
+}
+
+for (sample in unique(depth$Sample))
+for (lib in 1:4)
+{
+data=read.table(paste('Size_distribution_extragenomic_extratranscriptomic_reads_',sample,'_',lib,'.dat',sep=''),header=T)
+d=(depth$Genome.matching_reads-depth$ncRNA.matching_reads)[depth$Sample==sample & depth$Library==lib]
+sense=data$Number_of_reads/d*1e6
+pdf(paste('Size_distribution_extragenomic_extratranscriptomic_reads_',sample,'_',lib,'.pdf',sep=''),width=5,height=3.5)
+par(mar=c(4,4,0.5,0))
+y_range=max(pretty(c(0,max(sense))))
+plot(18,18,xlim=c(17,31),ylim=c(0,y_range),xlab='RNA length (nt)',ylab='Number of reads (ppm)',ty='n',axes=F)
+axis(1)
+axis(2)
+for (size in 18:30)
+rect(size-0.5,0,size+0.5,sense[data$Size==size],border='red',lwd=2)
+dev.off()
+}
+
+for (sample in unique(depth$Sample))
+for (lib in 1:4)
+{
+data=read.table(paste('Size_distribution_non_ncRNA_genomic_reads_',sample,'_',lib,'.dat',sep=''),header=T)
+d=(depth$Genome.matching_reads-depth$ncRNA.matching_reads)[depth$Sample==sample & depth$Library==lib]
+sense=data$Number_of_reads/d*1e6
+pdf(paste('Size_distribution_non_ncRNA_genomic_reads_',sample,'_',lib,'.pdf',sep=''),width=5,height=3.5)
+par(mar=c(4,4,0.5,0))
+y_range=max(pretty(c(0,max(sense))))
+plot(18,18,xlim=c(17,31),ylim=c(0,y_range),xlab='RNA length (nt)',ylab='Number of reads (ppm)',ty='n',axes=F)
+axis(1)
+axis(2)
+for (size in 18:30)
+rect(size-0.5,0,size+0.5,sense[data$Size==size],border='red',lwd=2)
+dev.off()
+}
+

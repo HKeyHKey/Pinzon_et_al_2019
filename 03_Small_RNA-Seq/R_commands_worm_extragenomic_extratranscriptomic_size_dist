@@ -1,0 +1,30 @@
+args = commandArgs(trailingOnly=TRUE)
+#args=c('embryon_15h','1')
+sample=args[1]
+
+depth=read.table('cel_Statistics.dat',header=T)
+data=read.table(paste('Size_distribution_extratranscriptomic_extragenomic_reads_',sample,'.dat',sep=''),header=T)
+if (sample=='GSM455391') name='GSM455391 (nematode CIP- then PNK-treated 18-26-mers; replicate 1)'
+if (sample=='GSM455392') name='GSM455392 (nematode CIP- then PNK-treated 18-26-mers; replicate 2)'
+if (sample=='GSM455393') name='GSM455393 (nematode CIP- then PNK-treated 18-26-mers; replicate 3)'
+
+d=(depth$Genomic_reads_not_matching_abundant_cel_ncRNAs)[depth$Sample==sample]
+sense=data$Reads/d*1e6
+par(mar=c(4,4,0.5,0))
+y_range=max(pretty(c(0,max(sense))))
+#Below: to display every graph with the same scale:
+y_range=6e5
+#Above: to display every graph with the same scale
+plot(18,18,xlim=c(17,31),ylim=c(0,y_range),xlab='RNA length (nt)',ylab='Number of reads (ppm)',ty='n',axes=F)
+display_range=range(summary(axis(2)))
+pdf(paste('Size_distribution_extragenomic_extratranscriptomic_reads_',sample,'.pdf',sep=''),width=6,height=4.5)
+plot(18,18,xlim=c(17,31),ylim=c(0,y_range),xlab='RNA length (nt)',ylab='Number of reads (ppm)',ty='n',axes=F)
+axis(1)
+axis(2,labels=abs(pretty(display_range)),at=pretty(display_range))
+for (size in 18:30)
+{
+rect(size-0.5,0,size+0.5,sense[data$Size==size],border='blue',lwd=2)
+}
+dev.off()
+
+

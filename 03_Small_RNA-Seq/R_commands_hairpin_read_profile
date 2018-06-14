@@ -1,0 +1,69 @@
+
+MIN_PAIRS=25 # minimal number of base pairs in the hairpin's stem
+MAX_DELTAG=-15 # maximal predicted folding DeltaG
+ABUNDANCE_CUTOFF=20 # minimal number of reads (in ppm) covering at least 1 nt in the hairpin sequence
+
+length_data=read.table('Hairpin_lengths.dat',header=F)
+structure_data=read.table('Hairpin_structure.dat',header=F)
+depth_data=read.table('Statistics.dat',header=T)
+sample_list=c('embryon_8h','embryon_15h','embryon_36h','embryon_60h','male','femelle')
+sample_display=c('8h embryo','15h embryo','36h embryo','60h embryo','adult male','adult female')
+
+for (hairpin in length_data$V1)
+{
+l=length_data$V2[length_data$V1==hairpin]
+pairing=strsplit(as.character(structure_data$V3[structure_data$V1==hairpin]),'')[[1]]
+pairs=0;branched=0;loop=0
+for (nt in 1:l)
+{
+if (pairing[nt]==')') loop=1
+if (pairing[nt]=='(')
+if (loop==1)
+{
+branched=1
+} else pairs=pairs+1
+}
+
+if ((branched==0) & (pairs>=MIN_PAIRS) & (structure_data$V4[structure_data$V1==hairpin]<=MAX_DELTAG)) # Structure criteria are met
+{
+coverage=list()
+major_size=c()
+for (s in 1:length(sample_list))
+{
+sample=sample_list[s]
+data=read.table(paste('Hairpin_mapping_',sample,'_1.dat',sep=''),header=TRUE)
+select=subset(data,data$Unified_hairpin_ID==hairpin)
+y=rep(0,l)
+if (length(select$bp_start)>0)
+for (read in 1:length(select$bp_start))
+{
+start=select$bp_start[read]
+end=start+nchar(as.character(select$read_seq[read]))-1
+if (end>l) end=l
+for (bp in start:end) y[bp]=y[bp]+select$count[read]
+}
+y=y/(depth_data$Genome.matching_reads-depth_data$ncRNA.matching_reads)[depth_data$Sample==sample & depth_data$Library==1]*1e6
+coverage[[sample]]=y
+major_size=append(major_size,max((c(1:l)[y>=0.9*max(y)]))-min((c(1:l)[y>=0.9*max(y)]))) # This is the sequence length between the start and the end of the major product (defined as the points where the coverage curve crosses the horizontal line showing 90% of the maximal coverage)
+}
+y_range=range(pretty(range(coverage)))
+
+if((max(range(coverage))>=ABUNDANCE_CUTOFF) & (length(major_size[major_size>=21 & major_size<=23])>=length(sample_list)/3)) # If coverage exceeds ABUNDANCE_CUTOFF on at least 1 nucleotide, and if at least one third of the developmental stages have major RNA products within the 21-23 nt range
+{
+pdf(paste('Hairpin_',hairpin,'_read_coverage.pdf',sep=''),width=35,height=6)
+plot(1,1,ty='n',xlim=c(0,l),ylim=y_range,axes=F,xlab='',ylab='Read abundance (ppm)')
+x=c(1:l)
+
+for (s in 1:length(sample_list))
+{
+par(new=T)
+plot(x,coverage[[s]],ty='l',axes=F,xlab='',ylab='',xlim=c(0,l),ylim=y_range,lwd=2,col=rainbow(length(sample_list))[s])
+}
+axis(1,labels=strsplit(as.character(structure_data$V2[structure_data$V1==hairpin]),'')[[1]],at=c(1:l))
+axis(1,labels=pairing,at=c(1:l),padj=1.5)
+axis(2)
+legend('topright',sample_display,pch='-',col=rainbow(length(sample_list)),lwd=2)
+dev.off()
+}
+}
+}

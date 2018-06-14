@@ -1,0 +1,45 @@
+data=read.table('miRNA_abundance_in_development.dat',header=T)
+
+depths=read.table('Statistics.dat',header=T)
+sample_list=c('embryon_8h','embryon_15h','embryon_36h','embryon_60h','femelle','male')
+d=c()
+for (sample in sample_list)
+{
+d=append(d,(depths$Genome.matching_reads-depths$ncRNA.matching_reads)[depths$Sample==sample & depths$Library==1])
+}
+
+x=c(8,15,36,60,90)
+for (hairpin in unique(data$Hairpin_ID))
+{
+y_5p=c()
+y_3p=c()
+for (s in 1:length(sample_list))
+{
+ab_5p=data$Reads_for_5p_RNA[data$Hairpin_ID==hairpin & data$Sample==sample_list[s]]
+ab_3p=data$Reads_for_3p_RNA[data$Hairpin_ID==hairpin & data$Sample==sample_list[s]]
+y_5p=append(y_5p,ab_5p/d[s]*1e6)
+y_3p=append(y_3p,ab_3p/d[s]*1e6)
+}
+y_max=max(c(y_5p,y_3p))
+y_range=range(pretty(c(0,y_max)))
+pdf(paste('Developmental_profile_miRNAs_from_hairpin_',hairpin,'.pdf',sep=''),width=10,height=5)
+plot(x[4:5],y_5p[4:5],col='pink',ty='b',xlim=c(0,100),ylim=y_range,pch=0,axes=F,xlab='Developmental stage',ylab='miRNA abundance (ppm)',lwd=1.5)
+par(new=T)
+plot(x[4:5],y_5p[c(4,6)],col='blue',ty='b',xlim=c(0,100),ylim=y_range,pch=0,axes=F,xlab='',ylab='',lwd=1.5)
+par(new=T)
+plot(x[4:5],y_3p[4:5],col='pink',ty='b',xlim=c(0,100),ylim=y_range,pch=1,axes=F,xlab='',ylab='',lwd=1.5)
+par(new=T)
+plot(x[4:5],y_3p[c(4,6)],col='blue',ty='b',xlim=c(0,100),ylim=y_range,pch=1,axes=F,xlab='',ylab='',lwd=1.5)
+par(new=T)
+plot(x[1:4],y_5p[1:4],ty='b',xlim=c(0,100),ylim=y_range,pch=0,axes=F,xlab='',ylab='',lwd=1.5)
+par(new=T)
+plot(x[1:4],y_3p[1:4],ty='b',xlim=c(0,100),ylim=y_range,pch=1,axes=F,xlab='',ylab='',lwd=1.5)
+axis(1,labels=c('8 hpf','15 hpf','36 hpf','60 hpf','Adult'),at=x)
+axis(2)
+if (c(x,x[length(x)])[y_5p==y_max | y_3p==y_max]>45) # if the highest peak is on the right, put legend on the left
+{
+legend('topleft',inset=0.02,c('5´ arm miRNA','3´ arm miRNA'),pch=c(0,1),lty=0,lwd=1.5)
+} else
+legend('topright',inset=0.02,c('5´ arm miRNA','3´ arm miRNA'),pch=c(0,1),lty=0,lwd=1.5)
+dev.off()
+}
