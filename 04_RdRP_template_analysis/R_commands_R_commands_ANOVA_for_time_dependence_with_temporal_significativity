@@ -1,0 +1,163 @@
+data=read.table('Bla_cRPKMs_only-49.tab',header=T)
+### Below: supplementing with adult whole body data (see Lucie's email of Nov. 24, 2017, for the assignation of the 4 samples to males and females):
+data$Adult_female_a=read.table('vast_out/expr_out/Ax1_ATCACG_L003_R1.cRPKM')$V2
+data$Adult_female_b=read.table('vast_out/expr_out/Ax2_CGATGT_L003_R1.cRPKM')$V2
+data$Adult_male_a=read.table('vast_out/expr_out/Ax7_CAGATC_L003_R1.cRPKM')$V2
+data$Adult_male_b=read.table('vast_out/expr_out/Ax8_ACTTGA_L003_R1.cRPKM')$V2
+### Above: supplementing with adult whole body data (see Lucie's email of Nov. 24, 2017, for the assignation of the 4 samples to males and females)
+
+
+nb_col=length(colnames(data))
+### Below: list of libraries for development (eggs, various embryonic stages, pre-metamorphosing larvae, adults), sorted in chronological order
+libraries=grep('^Eggs_',colnames(data))
+for (emb in c('32cells','Blastula','7','8','10','11','15','18','21','24','27','36','50','60'))
+libraries=append(libraries,grep(paste('^Embr_',emb,sep=''),colnames(data)))
+libraries=append(libraries,grep('^PreMetam_',colnames(data)))
+libraries=append(libraries,grep('^Adult_female_',colnames(data)))
+libraries=append(libraries,grep('^Adult_male_',colnames(data)))
+### Above: list of libraries for development (eggs, various embryonic stages, pre-metamorphosing larvae, adults), sorted in chronological order
+
+### Below: these are RdRP genes:
+genes=c("BL09945","BL02069","BL23385","BL27717","BL19289","BL07831")
+
+rpkm=c()
+for (g in genes)
+{
+add=c()
+for (lib in libraries)
+add=append(add,data[,colnames(data)[lib]][data$ID==g])
+rpkm=rbind(rpkm,add)
+}
+
+chrono=c(rep(0,times=2),rep(3.75,times=5),rep(6,times=2)) # Age post-fertilization (in hours) for "eggs", "32 cells" (3h45 according to Hector: see 'Table_S3_Staging.xlsx' from his email of Nov. 23, 2017) and "blastula" (6h according to Hector: see 'Table_S3_Staging.xlsx' from his email of Nov. 23, 2017)
+chrono=append(chrono,as.numeric(gsub('h_.*','',gsub('^Embr_','',colnames(data)[libraries][grep('^Embr_[0-9]*h',colnames(data)[libraries])]))))
+AGE_PREMET=100 # Age post-fertilization (in hours) for "PreMetam" (arbitrary ! Hector's data, in 'Table_S3_Staging.xlsx' from his email of Nov. 23, 2017, only says that the "1 gill slit larva" stage is 72 hpf, and there are a few more stages before "premetamorphic")
+AGE_FEMALE=120 # Adult age (in hours) (arbitrary ! Hector's data, in 'Table_S3_Staging.xlsx' from his email of Nov. 23, 2017, only says that the "1 gill slit larva" stage is 72 hpf, and there are a few more stages before "premetamorphic")
+AGE_MALE=130 # Adult age (in hours) (arbitrary ! Hector's data, in 'Table_S3_Staging.xlsx' from his email of Nov. 23, 2017, only says that the "1 gill slit larva" stage is 72 hpf, and there are a few more stages before "premetamorphic")
+chrono=append(chrono,c(AGE_PREMET,rep(AGE_FEMALE,times=2),rep(AGE_MALE,times=2)))
+
+averaged=c()
+for (t in unique(chrono))
+{
+select=c(1:length(chrono))[chrono==t]
+if (length(select)>1) # if there are more than 1 replicates for that time point
+{
+averaged=cbind(averaged,apply(rpkm[,select],1,mean))
+} else averaged=cbind(averaged,rpkm[,select])
+}
+
+
+### Below: choose a nice color code
+maxima=c()
+for (i in 1:6) maxima=append(maxima,max(averaged[i,]))
+color_code=rep("0",times=6)
+for (i in 1:6) color_code[order(maxima,decreasing=T)[i]]=rainbow(30)[c(1,4,7,11,17,22)][i]
+### Above: choose a nice color code
+
+
+### Below: verify ANOVA applicability (normality and variance homogeneity):
+for (i in 1:6)
+{
+normal_pval=c()
+for (cr in unique(chrono))
+if ((length(rpkm[i,][chrono==cr])>=3) & (length(unique(rpkm[i,][chrono==cr]))>1))
+normal_pval=append(normal_pval,shapiro.test(rpkm[i,][chrono==cr])$p.value)
+library(car)
+homosced_pval=leveneTest(rpkm[i,]~as.factor(chrono))$Pr[1]
+print(normal_pval)
+print(homosced_pval)
+}
+# Conclusion: normality could not be tested (not enough replicates) and variances are strongly heterogeneous (for each of the 6 RdRP genes). Better use Kruskal-Wallis' test rather than ANOVA.
+### Above: verify ANOVA applicability (normality and variance homogeneity)
+
+pdf('Time-dependency_significativity_Candidate_RdRP_expression_according_to_RNA-seq.pdf',width=8,height=5)
+range=c(0,max(pretty(range(rpkm))))
+plot(unique(chrono),averaged[1,],ty='l',xlab='Developmental stage',ylab='mRNA abundance (rpkm)',axes=F,ylim=range,xlim=c(0,AGE_MALE),col=color_code[1],pch=19)
+for (i in 2:6)
+{
+par(new=T)
+plot(unique(chrono),averaged[i,],ty='l',xlab='',ylab='',axes=F,ylim=range,xlim=c(0,AGE_MALE),col=color_code[i],pch=19)
+}
+for (i in 1:6)
+{
+points(chrono,rpkm[i,],col=color_code[i])
+}
+#axis(1,labels=c("Egg","32 cells","Blastula","7 hpf","8 hpf","10 hpf","11 hpf","15 hpf","18 hpf","24 hpf","27 hpf","36 hpf","50 hpf","60 hpf","Premetamorphic\nlarva"),at=unique(chrono)) # too crowded...
+axis(1,labels=c("Egg","8 hpf","15 hpf","36 hpf","60 hpf","Premetamorphic\nlarva","Female","Male"),at=c(0,8,15,36,60,AGE_PREMET,AGE_FEMALE,AGE_MALE))
+axis(2)
+display=genes
+for (active in c("BL09945","BL02069","BL23385")) display[grep(active,display)]=paste(display[grep(active,display)],"(active site)")
+legend("topleft",display,col=color_code,pch=19)
+for (i in 1:6)
+#text(50,3+i/2,signif(anova(lm(rpkm[i,]~chrono))$Pr[1],digits=4),col=color_code[i])# No: ANOVA not applicable here
+text(50,3+i/2,signif(kruskal.test(rpkm[i,][chrono<=100]~chrono[chrono<=100])$p.value,digits=4),col=color_code[i]) # only uses chrono<=100 because separated sexes creates additional variability specifically in adults
+dev.off()
+
+### Below: these RdRP templates:
+genes=c("BL67984","BL15804","BL28448","BL16120")
+
+rpkm=c()
+for (g in genes)
+{
+add=c()
+for (lib in libraries)
+add=append(add,data[,colnames(data)[lib]][data$ID==g])
+rpkm=rbind(rpkm,add)
+}
+
+averaged=c()
+for (t in unique(chrono))
+{
+select=c(1:length(chrono))[chrono==t]
+if (length(select)>1) # if there are more than 1 replicates for that time point
+{
+averaged=cbind(averaged,apply(rpkm[,select],1,mean))
+} else averaged=cbind(averaged,rpkm[,select])
+}
+
+### Below: choose a nice color code
+maxima=c()
+for (i in 1:nrow(averaged)) maxima=append(maxima,max(averaged[i,]))
+color_code=rep("0",times=6)
+for (i in 1:nrow(averaged)) color_code[order(maxima,decreasing=T)[i]]=rainbow(30)[c(1,4,7,11,17,22)][i]
+### Above: choose a nice color code
+
+### Below: verify ANOVA applicability (normality and variance homogeneity):
+for (i in 1:nrow(averaged))
+{
+normal_pval=c()
+for (cr in unique(chrono))
+if ((length(rpkm[i,][chrono==cr])>=3) & (length(unique(rpkm[i,][chrono==cr]))>1))
+normal_pval=append(normal_pval,shapiro.test(rpkm[i,][chrono==cr])$p.value)
+library(car)
+homosced_pval=leveneTest(rpkm[i,]~as.factor(chrono))$Pr[1]
+print(normal_pval)
+print(homosced_pval)
+}
+# Conclusion: normality could not always be tested (not enough replicates) and variances are strongly heterogeneous (for each of the 6 RdRP genes). Better use Kruskal-Wallis' test rather than ANOVA.
+### Above: verify ANOVA applicability (normality and variance homogeneity)
+
+
+pdf('Time-dependency_significativity_Preferred_RdRP_template_expression_according_to_RNA-seq.pdf',width=8,height=5)
+range=c(0,max(pretty(range(rpkm))))
+plot(unique(chrono),averaged[1,],ty='l',xlab='Developmental stage',ylab='mRNA abundance (rpkm)',axes=F,ylim=range,xlim=c(0,AGE_MALE),col=color_code[1],pch=19)
+for (i in 2:nrow(averaged))
+{
+par(new=T)
+plot(unique(chrono),averaged[i,],ty='l',xlab='',ylab='',axes=F,ylim=range,xlim=c(0,AGE_MALE),col=color_code[i],pch=19)
+}
+for (i in 1:nrow(averaged))
+{
+points(chrono,rpkm[i,],col=color_code[i])
+}
+#axis(1,labels=c("Egg","32 cells","Blastula","7 hpf","8 hpf","10 hpf","11 hpf","15 hpf","18 hpf","24 hpf","27 hpf","36 hpf","50 hpf","60 hpf","Premetamorphic\nlarva"),at=unique(chrono)) # too crowded...
+axis(1,labels=c("Egg","8 hpf","15 hpf","36 hpf","60 hpf","Premetamorphic\nlarva","Female","Male"),at=c(0,8,15,36,60,AGE_PREMET,AGE_FEMALE,AGE_MALE))
+axis(2)
+display=genes
+for (active in c("BL09945","BL02069","BL23385")) display[grep(active,display)]=paste(display[grep(active,display)],"(active site)")
+legend("topleft",display,col=color_code,pch=19)
+pval=c()
+for (i in 1:nrow(averaged))
+text(50,0.5+i/3,signif(kruskal.test(rpkm[i,][chrono<=100]~chrono[chrono<=100])$p.value,digits=4),col=color_code[i]) # only uses chrono<=100 because separated sexes creates additional variability specifically in adults
+dev.off()
+

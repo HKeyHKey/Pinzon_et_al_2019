@@ -1,0 +1,38 @@
+RATIO_CUTOFF=10 # Cutoff (in antisense/sense ratio for junction reads) for a transcript to be selected (it has to exceed that ratio cutoff in at least one library)
+CUTOFF=10 # Cutoff (in ppm, with the denominator being: genome-matching reads that don't match abundant ncRNAs) on the abundance of antisense junction RNAs
+CUTOFF2=100 # Cutoff (in number of raw reads in the combined 24 libraries) on the abundance of antisense junction RNAs
+depths=read.table('Statistics.dat',header=T)
+
+selected_on_ratio_and_ppm=c()
+
+for (sample in c('embryon_15h','embryon_36h','embryon_60h','embryon_8h','femelle','male'))
+for (lib in c(1:4))
+{
+depth=(depths$Genome.matching_reads-depths$ncRNA.matching_reads)[depths$Sample==sample & depths$Library==lib]
+data=read.table(paste('Sense_vs_antisense_junction_reads_',sample,'_',lib,'.dat',sep=''),header=T)
+selected_on_ratio_and_ppm=append(selected_on_ratio_and_ppm,as.character(data$Transcript[data$Antisense_junction_reads>RATIO_CUTOFF*data$Sense_junction_reads & data$Antisense_junction_reads>=CUTOFF*depth/1e6]))
+}
+
+selected_on_ratio_and_ppm=unique(selected_on_ratio_and_ppm)
+antisense_reads=c()
+
+for (sample in c('embryon_8h','embryon_15h','embryon_36h','embryon_60h','femelle','male'))
+for (lib in c(1:4))
+{
+data=read.table(paste('Sense_vs_antisense_junction_reads_',sample,'_',lib,'.dat',sep=''),header=T)
+add=c()
+for (g in selected_on_ratio_and_ppm)
+{
+n=data$Antisense_junction_reads[data$Transcript==g]
+if (length(n)==0)
+n=0
+add=append(add,n)
+}
+antisense_reads=rbind(antisense_reads,add)
+}
+
+preferred=selected_on_ratio_and_ppm[apply(antisense_reads,2,sum)>CUTOFF2]
+
+sink('Transcripts_enriched_in_antisense_junction_reads.txt')
+print(preferred)
+sink()
