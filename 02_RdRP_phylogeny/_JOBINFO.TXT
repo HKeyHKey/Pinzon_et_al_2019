@@ -1,0 +1,14 @@
+Task\ label=MARSV1SHORTV3MBLGG
+Task\ ID=1446904
+Tool=MRBAYES_XSEDE
+created\ on=2018-03-26 04:43:53.0
+JobHandle=NGBW-JOB-MRBAYES_XSEDE-E79FF79AB2D1489B9B635192F26C877B
+resource=comet
+User\ ID=3842
+User\ Name=stbertra
+email=stephanie.bertrand@obs-banyuls.fr
+
+Output=(ALL_FILES,*,UNKNOWN,UNKNOWN,UNKNOWN)
+ChargeFactor=1.000000
+cores=8
+JOBID=15167355
