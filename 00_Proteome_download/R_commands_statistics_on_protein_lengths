@@ -1,0 +1,18 @@
+memo=c()
+memo_species=c()
+for (file in list.files(pattern='^Predicted_protein_lengths_'))
+{
+species=sub('.dat$','',sub('^Predicted_protein_lengths_','',file))
+data=read.table(file)
+#memo=rbind(memo,as.numeric(quantile(data$V1,c(0,0.1,0.25,0.5,0.75,0.9,1))))
+memo=rbind(memo,c(length(data$V1[data$V1>=100]),length(data$V1[data$V1>=250]),length(data$V1[data$V1>=500]),length(data$V1[data$V1>=750]),length(data$V1[data$V1>=1000]),length(data$V1[data$V1>=1250]),length(data$V1[data$V1>=1500]),length(data$V1[data$V1>=1750]),length(data$V1[data$V1>=2000])))
+memo_species=append(memo_species,species)
+}
+#truc=list(memo_species,memo[,1],memo[,2],memo[,3],memo[,4],memo[,5],memo[,6],memo[,7])
+#names(truc)=c('Species','perc0','perc10','perc25','perc50','perc75','perc90','perc100')
+truc=list(memo_species,memo[,1],memo[,2],memo[,3],memo[,4],memo[,5],memo[,6],memo[,7],memo[,8],memo[,9])
+names(truc)=c('Species','n100','n250','n500','n750','n1000','n1250','n1500','n1750','n2000')
+#percentiles=as.data.frame(truc)
+number_long=as.data.frame(truc)
+#write.csv(percentiles,'Length_percentiles.csv')
+write.csv(number_long,'Length_numbers.csv')
