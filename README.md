@@ -7,6 +7,6 @@ Scripts and data for the generation of figures in Pinzón et al. (2018).
 
 3. Phylogeny of the "eukaryotic RdRP" protein family: directory '02_RdRP_phylogeny' (generation of Figure 2).
 
-4. Small RNA-Seq in B. lanceolatum: directory '03_Small_RNA-Seq' (classification of small RNAs into "genome-matching", "abundant non-coding RNA-matching", "pre-miRNA-matching", "transcriptome-matching, "extragenomic and extratranscriptomic" populations, to generate Figures 3, 4 and 5, Supplementary Figure 2, Supplementary Table 1, and Supplementary Data sections 1-6).
+4. Small RNA-Seq in B. lanceolatum: directory '03_Small_RNA-Seq' (classification of small RNAs into "genome-matching", "abundant non-coding RNA-matching", "pre-miRNA-matching", "transcriptome-matching, "extragenomic and extratranscriptomic", "exon-exon junction-matching" populations, and analysis of public C. elegans Small RNA-Seq datasets) to generate Figures 3 and 4, Supplementary Figures 2 and 3, Table 1, Supplementary Table 1, and Supplementary File S1 sections 1-6.
 
-5. Analysis of prefered RdRP templates: directory '04_RdRP_template_analysis' (identification of prefered RdRP templates, comparison of their expression profiles with that of their antisense exon-exon junction-matching fragments, and that of RdRPs themselves, for Figure 6 and Supplementary Figure 4).
+5. Analysis of small RNAs matching known pathogen genomes, or potential pathogens (found by contig assembly from extragenomic, extratranscriptomic reads), to generate Supplementary File S1 sections 7-15, Table 2, and Supplementary Figure 5.
