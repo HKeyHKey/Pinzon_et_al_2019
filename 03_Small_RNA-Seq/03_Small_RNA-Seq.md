@@ -12,6 +12,7 @@ Bowtie2 index files for the Branchiostoma lanceolatum genome are available at:
 https://www.igh.cnrs.fr/images/microsite/herve-seitz/files/pinzon-et-al-2018/03_Small_RNA-Seq//B_lanceolatum_genome_bowtie2_index.tar.bz2
 
 (download the adapter-trimmed fastq files and adapt the value of $PATH accordingly; download the bowtie2 index files and adapt the value of $PATH2 accordingly)
+
 ``for f in `ls $PATH/*Trimmed*`;do name=`echo $f | sed -e 's|.*/||' -e 's|_Trimmed.*||'`;bowtie2 -x $PATH2/B_lanceolatum -U $f --no-unal --quiet -S Mapping_$name'.sam';done``
 
 3. Mapping on a database of B. lanceolatum abundant non-coding RNAs ('abundant_B_lanceolatum_ncRNAs.fa'; that database was assembled by blast-identification of orthologous loci for murine rRNAs, tRNAs, snRNAs, snoRNAs, scaRNAs and human 28S rRNA in the B. lanceolatum genome, then supplemented with sequences found after a sensitive homology search in the B. lanceolatum transcriptome, focusing on transcripts matched by high numbers of small RNA reads in our libraries):
