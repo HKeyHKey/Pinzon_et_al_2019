@@ -1,0 +1,2 @@
+l=read.table('tmp.dat')$V1
+write.csv(c(signif(mean(l),digits=3),signif(sd(l),digits=3)),'out.csv')

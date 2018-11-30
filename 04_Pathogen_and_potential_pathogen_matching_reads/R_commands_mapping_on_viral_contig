@@ -1,0 +1,32 @@
+args=commandArgs(trailingOnly=TRUE)
+sample=args[1]
+lib=args[2]
+contig_length=args[3]
+
+input_file=paste('Champion_contig_mappers_in_',sample,'_',lib,'.dat',sep='')
+stat=read.table('/mnt/data/home/herve.seitz/Amphioxus/Small_RNA_mapping/Statistics.dat',header=T)
+depth=(stat$Genome.matching_reads-stat$ncRNA.matching_reads)[stat$Sample==sample & stat$Library==lib]
+
+data=read.table(input_file,header=T)
+length=c()
+for (i in 1:length(data$Sequence))
+length=append(length,nchar(as.character(data$Sequence[i])))
+starts=data$Position
+ends=starts+length-1
+x=c(1:contig_length)
+y_sense=rep(0,times=length(x))
+y_antisense=rep(0,times=length(x))
+for (i in 1:length(data$Sequence))
+for (bp in starts[i]:ends[i])
+if (data$Orientation[i]==0)
+{
+y_sense[bp]=y_sense[bp]+1
+} else y_antisense[bp]=y_antisense[bp]+1
+y_sense=y_sense*1e6/depth
+y_antisense=-y_antisense*1e6/depth
+y_range=range(pretty(c(-max(y_antisense),max(y_sense))))
+pdf(paste('Viral_contig_coverage_in_',sample,'_',lib,'.pdf',sep=''),width=6,height=6)
+plot(x,y_sense,ty='l',lwd=2,col='blue',ylim=y_range,xlab='Coordinate in contig (bp)',ylab='Read coverage (ppm)',main=paste(sample,', lib. ',lib,'\n(',length(data$Sequence),' matching raw reads)',sep=''))
+par(new=T)
+plot(x,y_antisense,ty='l',lwd=2,col='red',ylim=y_range,axes=F,xlab='',ylab='')
+dev.off()

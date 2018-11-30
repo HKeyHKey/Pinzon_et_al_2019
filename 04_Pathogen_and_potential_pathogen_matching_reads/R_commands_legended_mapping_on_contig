@@ -1,0 +1,50 @@
+args=commandArgs(trailingOnly=TRUE)
+contig=args[1]
+contig_length=args[2]
+
+x=c(1:contig_length)
+all=x
+for (sample in c('embryon_8h','embryon_15h','embryon_36h','embryon_60h','femelle','male'))
+for (lib in 1:4)
+{
+input_file=paste('Contig_',contig,'_mappers_in_',sample,'_',lib,'.dat',sep='')
+stat=read.table('/mnt/data/home/herve.seitz/Amphioxus/Small_RNA_mapping/Statistics.dat',header=T)
+depth=(stat$Genome.matching_reads-stat$ncRNA.matching_reads)[stat$Sample==sample & stat$Library==lib]
+data=read.table(input_file,header=T)
+length=c()
+y_sense=rep(0,times=length(x))
+y_antisense=rep(0,times=length(x))
+if (length(data$Sequence)>0)
+{
+for (i in 1:length(data$Sequence))
+length=append(length,nchar(as.character(data$Sequence[i])))
+starts=data$Position
+ends=starts+length-1
+for (i in 1:length(data$Sequence))
+for (bp in starts[i]:ends[i])
+if (data$Orientation[i]==0)
+{
+y_sense[bp]=y_sense[bp]+1
+} else y_antisense[bp]=y_antisense[bp]+1
+y_sense=y_sense*1e6/depth
+y_antisense=-y_antisense*1e6/depth
+}
+all=cbind(all,y_sense[x],y_antisense[x])
+}
+
+y_range=range(pretty(c(min(all[,2*c(1:24)+1]),max(all[,2*c(1:24)]))))
+colors=c('red','orange','green','cyan','blue','purple')
+pdf(paste('Legended_Contig_',contig,'_coverage.pdf',sep=''),width=6,height=6)
+plot(x,y_sense,ty='n',ylim=y_range,xlab='Coordinate in contig (bp)',ylab='Read coverage (ppm)')
+for (j in 1:6)
+for (k in 1:4)
+{
+i=j*k
+par(new=T)
+plot(x,all[,2*i],ty='l',lwd=2,col=colors[j],ylim=y_range,xlab='',ylab='',axes=F,lty=k)
+par(new=T)
+plot(x,all[,2*i+1],ty='l',lwd=2,col=colors[j],ylim=y_range,xlab='',ylab='',axes=F,lty=k)
+}
+legend('topleft',c('8 hpf embryo','15hpf embryo','36 hpf embryo','60 hpf embryo','adult female','adult male'),pch='-',col=colors)
+legend('topright',paste('lib.',1:4),lty=c(1:4),col='black')
+dev.off()

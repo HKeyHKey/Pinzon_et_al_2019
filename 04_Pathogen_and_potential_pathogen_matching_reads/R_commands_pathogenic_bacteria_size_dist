@@ -1,0 +1,20 @@
+depth=read.table('Statistics.dat',header=T)
+
+for (species in c('Staphylococcus_aureus','Vibrio_alginolyticus','Vibrio_anguillarum'))
+for (sample in unique(depth$Sample))
+for (lib in 1:4)
+{
+data=read.table(paste('Size_distribution_',species,'_reads_',sample,'_',lib,'.dat',sep=''),header=T)
+d=(depth$Genome.matching_reads-depth$ncRNA.matching_reads)[depth$Sample==sample & depth$Library==lib]
+sense=data$Number_of_reads/d*1e6
+pdf(paste('Size_distribution_',species,'_reads_',sample,'_',lib,'.pdf',sep=''),width=5,height=3.5)
+par(mar=c(4,4,0.5,0))
+y_range=max(pretty(c(0,max(sense))))
+plot(18,18,xlim=c(17,31),ylim=c(0,y_range),xlab='RNA length (nt)',ylab='Number of reads (ppm)',ty='n',axes=F)
+axis(1)
+axis(2)
+for (size in 18:30)
+rect(size-0.5,0,size+0.5,sense[data$Size==size],border='red',lwd=2)
+dev.off()
+}
+
