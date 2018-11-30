@@ -187,5 +187,5 @@ Statistics transcriptome-wide (raw reads and ppm):
 
 ``awk '{s+=$3} END {print s}' Junction_and_exonic_reads_blat_output.dat # Number of raw reads mapping sense to junctions (result: 5683)``
 ``awk '{s+=$5} END {print s}' Junction_and_exonic_reads_blat_output.dat # Number of raw reads mapping antisense to junctions (result: 80)``
-``awk '{s+=$3*1000000/'$total_depth'} END {print s}' Junction_and_exonic_reads_blat_output.dat # Number of depth-normalized reads mapping sense to junctions (result: 94.2325 ppm)``
-``awk '{s+=$5*1000000/'$total_depth'} END {print s}' Junction_and_exonic_reads_blat_output.dat # Number of depth-normalized reads mapping antisense to junctions (result: 1.32652 ppm)``
+``awk '{s+=$3*1000000/'$total_depth'} END {print s}' Junction_and_exonic_reads_blat_output.dat`` (number of depth-normalized reads mapping sense to junctions (result: 94.2325 ppm))
+``awk '{s+=$5*1000000/'$total_depth'} END {print s}' Junction_and_exonic_reads_blat_output.dat`` (number of depth-normalized reads mapping antisense to junctions (result: 1.32652 ppm))
