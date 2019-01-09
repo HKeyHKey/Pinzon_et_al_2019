@@ -1,5 +1,5 @@
-# Pinzon_et_al_2018
-Scripts and data for the generation of figures in Pinzón et al. (2018).
+# Pinzon_et_al_2019
+Scripts and data for the generation of figures in Pinzón et al. (PLOS Genetics, 2019).
 
 1. Predicted animal proteome sequence download: directory '00_Proteome_download' (these data files will be used in the next step).
 
