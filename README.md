@@ -1,5 +1,5 @@
 # Pinzon_et_al_2019
-Scripts and data for the generation of figures in [Pinzón et al. (PLoS Genetics, 2019)](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1007915 "Open-access article on journal's website").
+Scripts and data for the generation of figures in [Pinzón et al. (*PLoS Genetics*, 2019)](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1007915 "Open-access article on journal's website").
 
 1. Predicted animal proteome sequence download: directory '00_Proteome_download' (these data files will be used in the next step).
 
