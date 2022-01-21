@@ -1,7 +1,7 @@
 1. Small RNA-Seq data:
 Raw fastq files are accessible at NCBI's SRA under accession number SRP125901. Adapter-trimmed fastq files are available at:
 https://www.igh.cnrs.fr/images/microsite/herve-seitz/files/pinzon-et-al-2018/03_Small_RNA-Seq//Trimmed_fastq.tar
-File nomenclature in that archive: STAGE_LIB_Trimmed.PF.R1.fastq.gz, with "STAGE" being "embryon_8h" for 8 hpf embryos (and idem for 15 hpf, 36 hpf and 60 hpf embryos), "femelle" being adult females, "male" being adult males; and "LIB" being either library #1, 2, 3 or 4 as described in Pinzón et al., 2018.
+File nomenclature in that archive: STAGE_LIB_Trimmed.PF.R1.fastq.gz, with "STAGE" being "embryon_8h" for 8 hpf embryos (and idem for 15 hpf, 36 hpf and 60 hpf embryos), "femelle" being adult females, "male" being adult males; and "LIB" being either library #1, 2, 3 or 4 as described in [Pinzón et al., 2019](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1007915).
 
 md5sum hash values for gzipped-compressed raw and trimmed fastq files are listed in 'md5sum_Seitz.txt'.
 
